@@ -9,3 +9,8 @@
  -useRef Hook
  -Firebase setup
  -Deploying app to Production
+ -Create SignUp User Account
+ -Implement Sign In user API
+ -Created Redux Store with userSlice
+ -Implemented Sign Out
+ -Update profile

@@ -1,12 +1,20 @@
 import React, { useRef, useState } from 'react';
 import Header from './Header';
 import { checkValidData } from '../utils/validate';
+import { createUserWithEmailAndPassword , signInWithEmailAndPassword} from "firebase/auth";
+import {auth} from "../utils/firebase";
+import { useNavigate } from 'react-router-dom';
+import { updateProfile } from "firebase/auth";
+import { useDispatch } from 'react-redux';
+import { addUser } from '../utils/userSlice';
 
 
 const Login = () => {
 
 const [isSignInForm, setIsSignInForm] = useState(true);
 const [errorMessage , setErrorMessage] = useState(null);
+const navigate = useNavigate();
+const dispatch = useDispatch();
 
 const name = useRef(null);
 const email = useRef(null);
@@ -26,6 +34,53 @@ const handleButtonClick = () => {
   );
 
   setErrorMessage(message);
+
+  if(message) return;
+
+  if(!isSignInForm){
+    //SignUp Logic
+    createUserWithEmailAndPassword(auth, email.current.value, password.current.value)
+  .then((userCredential) => {
+    // Signed up 
+    const user = userCredential.user;
+    updateProfile(user, {
+      displayName: name.current.value, 
+      photoURL: "https://occ-0-4994-2186.1.nflxso.net/dnm/api/v6/vN7bi_My87NPKvsBoib006Llxzg/AAAABTZ2zlLdBVC05fsd2YQAR43J6vB1NAUBOOrxt7oaFATxMhtdzlNZ846H3D8TZzooe2-FT853YVYs8p001KVFYopWi4D4NXM.png?r=229"
+    }).then(() => {
+      // Profile updated!
+      const {uid , email, displayName, photoURL} = auth.currentUser;
+      dispatch(addUser({uid:uid , email: email, displayName: displayName, photoURL: photoURL}));
+
+      navigate("/browse");
+    }).catch((error) => {
+      // An error occurred
+      setErrorMessage(error.message);
+    });
+    console.log(user);
+    
+  })
+  .catch((error) => {
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    setErrorMessage(errorCode + "-" + errorMessage);
+  });
+  }
+  else{
+    //SignIn Logic
+    signInWithEmailAndPassword(auth, email.current.value, password.current.value)
+  .then((userCredential) => {
+    // Signed in 
+    const user = userCredential.user;
+    console.log(user);
+    navigate("/browse");
+  })
+  .catch((error) => {
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    setErrorMessage(errorCode + "-" + errorMessage);
+  });
+  }
+
 }
 
 const toggleSignInForm = () =>{
