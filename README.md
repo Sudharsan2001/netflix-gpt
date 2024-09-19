@@ -7,3 +7,5 @@
  -Sign Up Form
  -Form Validation
  -useRef Hook
+ -Firebase setup
+ -Deploying app to Production
